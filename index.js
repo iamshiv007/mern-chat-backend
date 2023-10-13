@@ -18,6 +18,6 @@ connect()
 const routes = require("./routes/router")
 app.use('/api', routes)
 
-app.get("/", (req, res) => {
+app.get("/api/", (req, res) => {
     res.send("Hello this is test message")
 })
