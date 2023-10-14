@@ -2,7 +2,6 @@ const express = require("express")
 const app = express()
 require("dotenv").config()
 const cors = require("cors")
-const { join } = require("path")
 const { createServer } = require("http")
 const routes = require("./routes/router")
 
@@ -19,36 +18,68 @@ app.use(express.json())
 app.use(cors())
 app.use('/api', routes)
 
-
 app.get("/", (req, res) => {
     res.send("Hello this is test message")
 })
 
-// app.get('/', (req, res) => {
-//     res.sendFile(join(__dirname, 'index.html'));
-// });
+const { getUsersInRoom, removeUser, addUser, getUser } = require("./users")
 
 io.on('connection', (socket) => {
     console.log("A User Connected")
-    // socket.on('chat message', (msg) => {
-    //     console.log('message: ' + msg);
-    // });
-    // socket.on('chat message', (msg) => {
-    //     io.emit('chat message', msg);
-    // });
 
-    socket.join("some room");
+    socket.on("join", ({ name, room }, callback) => {
+        const { error, user } = addUser({ id: socket.id, name, room })
 
-    io.to("some room").emit("some event");
+        if (error) return callback(error)
 
-    socket.on("foo", (value, callback) => {
-        io.emit("foo", value),
-            callback(
-                { status: "Ok" }
-            )
+        // Emit will send message to the user
+        // who had joined
+        socket.emit('message', {
+            user: 'admin', text:
+                `${user.name}, 
+            welcome to room ${user.room}.`
+        });
+
+        // Broadcast will send message to everyone
+        // in the room except the joined user
+        socket.broadcast.to(user.room)
+            .emit('message', {
+                user: "admin",
+                text: `${user.name}, has joined`
+            });
+
+        socket.join(user.room)
+
+        io.to(user.room).emit("roomData", {
+            room: user.room,
+            users: getUsersInRoom(user.room)
+        })
+
+        callback()
+    });
+
+    socket.on("sendMessage", (message, callback) => {
+
+        const user = getUser(socket.id)
+        io.to(user.room).emit("message", {
+            user: user.name, text: message
+        })
+
+        io.to(user.room).emit("roomData", {
+            room: user.room,
+            users: getUsersInRoom(user.room)
+        })
+
+        callback()
     })
 
     socket.on("disconnect", () => {
+        const user = removeUser(socket.id)
+        if (user) {
+            io.to(user.room).emit('message', {
+                user: "Admin", text: `${user.name} had left`
+            })
+        }
         console.log("A User Disconnected")
     })
 });
