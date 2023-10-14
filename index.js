@@ -25,7 +25,7 @@ app.get("/", (req, res) => {
 const { getUsersInRoom, removeUser, addUser, getUser } = require("./users")
 
 io.on('connection', (socket) => {
-    console.log("A User Connected")
+    console.log(`⚡: ${socket.id} user just connected!`)
 
     socket.on("join", ({ name, room }, callback) => {
         const { error, user } = addUser({ id: socket.id, name, room })
@@ -73,6 +73,11 @@ io.on('connection', (socket) => {
         callback()
     })
 
+    socket.on("typing", (status, name, room) => {
+        socket.broadcast.to(room)
+            .emit('typing', status, name);
+    })
+
     socket.on("disconnect", () => {
         const user = removeUser(socket.id)
         if (user) {
@@ -80,7 +85,7 @@ io.on('connection', (socket) => {
                 user: "Admin", text: `${user.name} had left`
             })
         }
-        console.log("A User Disconnected")
+        console.log('🔥: A user disconnected')
     })
 });
 
