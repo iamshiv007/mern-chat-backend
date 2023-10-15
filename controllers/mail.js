@@ -2,24 +2,24 @@
 const nodemailer = require("nodemailer");
 const Mail = require("../models/mail");
 
-exports.sendMail = async (req, res) => {
+const sendMail = async (req, res) => {
 
-    const { name, email, subject, message, receiverEmail } = req.body;
+  const { name, email, subject, message, receiverEmail } = req.body;
 
-    // Replace these with your actual email service settings
-    const transporter = nodemailer.createTransport({
-        service: "Gmail",
-        auth: {
-            user: process.env.FROM_EMAIL_ADDRESS,
-            pass: process.env.FROM_EMAIL_PASS,
-        },
-    });
+  // Replace these with your actual email service settings
+  const transporter = nodemailer.createTransport({
+    service: "Gmail",
+    auth: {
+      user: process.env.FROM_EMAIL_ADDRESS,
+      pass: process.env.FROM_EMAIL_PASS,
+    },
+  });
 
-    const mailOptions = {
-        from: process.env.FROM_EMAIL_ADDRESS,
-        to: receiverEmail,
-        subject,
-        html: `<html>
+  const mailOptions = {
+    from: process.env.FROM_EMAIL_ADDRESS,
+    to: receiverEmail,
+    subject,
+    html: `<html>
             <head>
               <style>
                 /* Define your CSS styles here */
@@ -59,16 +59,18 @@ exports.sendMail = async (req, res) => {
             </body>
           </html>
           `
-    };
+  };
 
-    try {
-        await transporter.sendMail(mailOptions);
+  try {
+    await transporter.sendMail(mailOptions);
 
-        const mail = await Mail.create(req.body)
+    const mail = await Mail.create(req.body)
 
-        res.status(200).json({ success: true, message: "Email sent successfully", mail });
-    } catch (error) {
-        console.error("Error sending email:", error);
-        res.status(500).json({ error: "An error occurred while sending the email" });
-    }
+    res.status(200).json({ success: true, message: "Email sent successfully", mail });
+  } catch (error) {
+    console.error("Error sending email:", error);
+    res.status(500).json({ error: "An error occurred while sending the email" });
+  }
 }
+
+module.exports = { sendMail }
