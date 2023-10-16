@@ -106,7 +106,6 @@ const logout = async (req, res) => {
 }
 
 const getUserDetails = async (req, res) => {
-    console.log("hello")
     res.status(200).json({ success: true, message: "User details got successfully.", user: req.user })
 }
 

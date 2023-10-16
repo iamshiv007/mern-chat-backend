@@ -1,10 +1,9 @@
 const express = require("express")
 const app = express()
-require("dotenv").config()
 const cors = require("cors")
 const { createServer } = require("http")
-const routes = require("./routes/router")
 const cookieParser = require("cookie-parser")
+require("dotenv").config()
 
 const server = createServer(app)
 const { Server } = require("socket.io")
@@ -23,103 +22,108 @@ app.use(cors({
     credentials: true
 }))
 app.use(cookieParser())
+
+const routes = require("./routes/router")
 app.use('/api', routes)
 
 app.get("/", (req, res) => {
     res.send("Hello this is test message")
 })
 
-const { getUsersInRoom, removeUser, addUser, getUser, getUser2, removeUser2, addUser2 } = require("./users")
+const { addUser, removeUser, getUser, getUsers, addUserToGroup, removeUserFromRoom, getUserFromgroup, getUsersFromGroup, } = require("./users")
 
 io.on('connection', (socket) => {
     console.log(`⚡: ${socket.id} user just connected!`)
 
-    socket.on("new-user-add", (userName) => {
-        const onlineUsers = addUser2(userName, socket.id)
-        // send all active users to new user
-        io.emit("get-users", onlineUsers);
-    });
-
-    socket.on("join", ({ name, room }, callback) => {
-        const { error, user } = addUser({ id: socket.id, name, room })
-
+    socket.on("new-online-user", (userName, callback) => {
+        const { error, user } = addUser(userName, socket.id)
         if (error) return callback(error)
-
-        // Emit will send message to the user
-        // who had joined
-        socket.emit('message', {
-            user: 'admin', text:
-                `${user.name}, 
-            welcome to room ${user.room}.`
-        });
-
-        // Broadcast will send message to everyone
-        // in the room except the joined user
-        socket.broadcast.to(user.room)
-            .emit('message', {
-                user: "admin",
-                text: `${user.name}, has joined`
-            });
-
-        socket.join(user.room)
-
-        io.to(user.room).emit("roomData", {
-            room: user.room,
-            users: getUsersInRoom(user.room)
-        })
-
+        // reset online users list
+        const onlineUsers = getUsers()
+        console.log(onlineUsers, "after new online user")
+        io.emit("get-online-users", onlineUsers);
         callback()
     });
+
+    socket.on("send-message", (sender, receiver, message, callback) => {
+        const user = getUser(receiver)
+        console.log(user, message)
+        io.to(user.socketId).emit("send-message", sender, message)
+        callback()
+    })
+
+    // New user to group
+    // socket.on("join-group", ({ userName, room }, callback) => {
+    //     const { error, user } = addUserToGroup({ id: socket.id, userName, room })
+
+    // if (error) return callback(error)
+
+    // Emit will send message to the user
+    // who had joined
+    // socket.emit('welcome-message', {
+    //     user: 'admin', text:
+    //         `${user.name}, 
+    //     welcome to room ${user.room}.`
+    // });
+
+    // Broadcast will send message to everyone
+    // in the room except the joined user
+    // socket.broadcast.to(user.room)
+    //     .emit('user-joined-message', {
+    //         user: "admin",
+    //         text: `${user.name}, has joined`
+    //     });
+
+    // socket.join(user.room)
+
+    // io.to(user.room).emit("group-data", {
+    //     room: user.room,
+    //     users: getUsersFromGroup(user.room)
+    // })
+
+    // callback()
+    // });
 
     // Group message
-    socket.on("sendMessage", (message, callback) => {
+    // socket.on("group-message", (message, callback) => {
 
-        const user = getUser(socket.id)
-        io.to(user.room).emit("message", {
-            user: user.name, text: message
-        })
+    //     const user = getUserFromGroup(socket.id)
+    //     io.to(user.room).emit("group-message", {
+    //         user: user.name, text: message
+    //     })
 
-        io.to(user.room).emit("roomData", {
-            room: user.room,
-            users: getUsersInRoom(user.room)
-        })
+    //     callback()
+    // })
 
-        callback()
-    })
-
-    socket.on("privateMessage", (sender, receiver, message, callback) => {
-        const user = getUser2(receiver)
-        io.to(user.socketId).emit("privateMessage", sender, message)
-        callback()
-    })
-
-    socket.on("typing", (status, name, room) => {
-        socket.broadcast.to(room)
-            .emit('typing', status, name);
-    })
+    // socket.on("typing", (status, name, room) => {
+    //     socket.broadcast.to(room)
+    //         .emit('typing', status, name);
+    // })
 
     socket.on("offline", () => {
-        // remove user from active users
-        const onlineUsers = removeUser2(socket.id)
-        // send all online users to all users
-        io.emit("get-users", onlineUsers);
+        // remove user from online users list
+        const user = removeUser(socket.id)
+        // reset online users list
+        const onlineUsers = getUsers()
+        io.emit("get-online-users", onlineUsers);
     });
 
     socket.on("disconnect", () => {
-        // User remove from online list
-        const onlineUsers = removeUser2(socket.id)
-        console.log(onlineUsers)
-        // reset all online users
-        io.emit("get-users", onlineUsers);
+        // remove user from online users list
+        const user = removeUser(socket.id)
+        const onlineUsers = getUsers()
+        // reset online users list
+        console.log(onlineUsers, "after disconnect")
+        io.emit("get-online-users", onlineUsers);
 
         // check if user exist in any room 
         // if yes remove him
-        const user = removeUser(socket.id)
-        if (user) {
-            io.to(user.room).emit('message', {
-                user: "Admin", text: `${user.name} had left`
-            })
-        }
+        // const user = removeUserFromGroup(socket.id)
+        // if (user) {
+        //     io.to(user.room).emit('message', {
+        //         user: "Admin", text: `${user.name} had left`
+        //     })
+        // }
         console.log('🔥: A user disconnected')
     })
 });
