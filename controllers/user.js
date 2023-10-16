@@ -7,7 +7,7 @@ const signup = async (
     req,
     res
 ) => {
-    const { userName, email, password, avatar, interest } = req.body;
+    const { userName, email, password, interest } = req.body;
 
     if (!userName || !email || !password) {
         return res
@@ -38,7 +38,7 @@ const signup = async (
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
 
-        const user = await User.create({ userName, email, password: hashedPassword, avatar, interest });
+        const user = await User.create({ userName, email, password: hashedPassword, interest });
 
         const token = await jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE })
 

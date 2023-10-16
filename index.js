@@ -29,21 +29,13 @@ app.get("/", (req, res) => {
     res.send("Hello this is test message")
 })
 
-const { getUsersInRoom, removeUser, addUser, getUser } = require("./users")
-
-let onlineUsers = [];
-
-const getUser2 = (id) => onlineUsers.find(user => user.userId === id)
-
+const { getUsersInRoom, removeUser, addUser, getUser, getUser2, removeUser2, addUser2 } = require("./users")
 
 io.on('connection', (socket) => {
     console.log(`⚡: ${socket.id} user just connected!`)
 
-    socket.on("new-user-add", (userId) => {
-        if (!onlineUsers.some((user) => user.userId === userId)) {  // if user is not added before
-            onlineUsers.push({ userId, socketId: socket.id });
-            console.log("new user is here!", onlineUsers);
-        }
+    socket.on("new-user-add", (userName) => {
+        const onlineUsers = addUser2(userName, socket.id)
         // send all active users to new user
         io.emit("get-users", onlineUsers);
     });
@@ -95,10 +87,9 @@ io.on('connection', (socket) => {
         callback()
     })
 
-    socket.on("privateMessage", (senderId, receiverId, message, callback) => {
-        const user = getUser2(receiverId)
-        console.log(user, message)
-        io.to(user.socketId).emit("privateMessage", senderId, message)
+    socket.on("privateMessage", (sender, receiver, message, callback) => {
+        const user = getUser2(receiver)
+        io.to(user.socketId).emit("privateMessage", sender, message)
         callback()
     })
 
@@ -109,14 +100,15 @@ io.on('connection', (socket) => {
 
     socket.on("offline", () => {
         // remove user from active users
-        onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
+        const onlineUsers = removeUser2(socket.id)
         // send all online users to all users
         io.emit("get-users", onlineUsers);
     });
 
     socket.on("disconnect", () => {
         // User remove from online list
-        onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
+        const onlineUsers = removeUser2(socket.id)
+        console.log(onlineUsers)
         // reset all online users
         io.emit("get-users", onlineUsers);
 

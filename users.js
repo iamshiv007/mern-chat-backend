@@ -1,4 +1,5 @@
 const users = []
+let onlineUsers = [];
 
 const addUser = ({ id, name, room }) => {
     name = name.trim().toLowerCase()
@@ -34,7 +35,17 @@ const getUser = (id) => users.find(user => user.id === id)
 
 const getUsersInRoom = (room) => users.filter((user) => user.room === room)
 
+const getUser2 = (userName) => onlineUsers.find(user => user.userName === userName)
+
+const removeUser2 = (socketId) => onlineUsers.filter((user) => user.socketId !== socketId)
+
+const addUser2 = (userName, socketId) => {
+    if (!onlineUsers.some((user) => user.userName === userName)) {  // if user is not added before
+        onlineUsers.push({ userName, socketId })
+    }
+    return onlineUsers
+}
 
 module.exports = {
-    addUser, removeUser, getUser, getUsersInRoom
+    addUser, removeUser, getUser, getUsersInRoom, getUser2, removeUser2, addUser2
 }
