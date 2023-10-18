@@ -2,8 +2,9 @@
 const User = require("../models/user")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
+const asyncHandler = require("express-async-handler")
 
-const signup = async (
+const signup = asyncHandler(async (
     req,
     res
 ) => {
@@ -14,9 +15,6 @@ const signup = async (
             .status(400)
             .json({ success: false, message: "Please fill all required fields" });
     }
-
-    try {
-
         const userNameExist = await User.findOne({ userName })
         const emailExist = await User.findOne({ email })
 
@@ -54,18 +52,9 @@ const signup = async (
             message: "User registered successfully.",
             user,
         });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message:
-                error?.response?.data?.message ||
-                error?.message ||
-                "Internal server error",
-        });
-    }
-}
+})
 
-const login = async (req, res) => {
+const login = asyncHandler(async (req, res) => {
 
     const { email, password } = req.body
 
@@ -93,7 +82,7 @@ const login = async (req, res) => {
     } else {
         res.status(400).json({ success: false, message: "Password does not matched." })
     }
-}
+})
 
 const logout = async (req, res) => {
     const options = {

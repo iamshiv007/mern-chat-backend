@@ -1,8 +1,10 @@
 const express = require("express")
-const app = express()
 const cors = require("cors")
-const { createServer } = require("http")
 const cookieParser = require("cookie-parser")
+const { createServer } = require("http")
+const routes = require("./routes/router")
+
+const app = express()
 require("dotenv").config()
 
 const server = createServer(app)
@@ -23,7 +25,6 @@ app.use(cors({
 }))
 app.use(cookieParser())
 
-const routes = require("./routes/router")
 app.use('/api', routes)
 
 app.get("/", (req, res) => {

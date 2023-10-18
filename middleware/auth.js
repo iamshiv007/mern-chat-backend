@@ -1,7 +1,8 @@
+const asyncHandler = require("express-async-handler")
 const User = require("../models/user")
 const jwt = require("jsonwebtoken")
 
-const isAuthenticatedUser = async (req, res, next) => {
+const isAuthenticatedUser = asyncHandler(async (req, res, next) => {
     const { token } = req.cookies
 
     if (!token) {
@@ -17,6 +18,5 @@ const isAuthenticatedUser = async (req, res, next) => {
         req.user = user
         next()
     }
-}
-
+})
 module.exports = { isAuthenticatedUser }
