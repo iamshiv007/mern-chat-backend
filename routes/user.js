@@ -6,8 +6,8 @@ const User = require("../models/user")
 const { check } = require("express-validator")
 
 const signupValidation = [
-    check('username')
-        .isLength({ min: 3, max: 20 })
+    check('userName')
+        .isLength({ min: 2, max: 20 })
         .withMessage('Username must be at least 3 chars long')
         .custom(async (value) => {
             const usernameExist = await User.findOne({ userName: value })
@@ -27,17 +27,17 @@ const signupValidation = [
             return true
         }),
     check('password')
-        .isLength({ min: 8 })
-        .withMessage('Password must be at least 8 chars long')
+        .isLength({ min: 6 })
+        .withMessage('Password must be at least 6 chars long')
 ]
 
 const loginValidation = [
-    check('username')
+    check('email')
         .isLength({ min: 3, max: 20 })
-        .withMessage('Username must be at least 3 chars long'),
+        .withMessage('E-mail must be at least 3 chars long'),
     check('password')
-        .isLength({ min: 8 })
-        .withMessage('Password must be at least 8 chars long')
+        .isLength({ min: 6 })
+        .withMessage('Password must be at least 6 chars long')
 ]
 
 router.post("/user/signup", signupValidation, signup)
