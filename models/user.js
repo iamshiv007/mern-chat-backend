@@ -4,22 +4,28 @@ const userSchema = new mongoose.Schema({
     userName: {
         type: String,
         required: true,
+        minLength: 3,
+        maxLength: 20,
         unique: true
     },
     email: {
         type: String,
         required: true,
+        maxLength: 50,
         unique: true
     },
     password: {
         type: String,
+        minLength: 8,
         required: true
     },
     avatar: {
-        type: String
+        type: String,
+        default: ''
     },
     interest: {
-        type: String
+        type: String,
+        default: ''
     }
 }, { timestamps: true });
 

@@ -1,11 +1,15 @@
 // pages/api/send-email.js
 const nodemailer = require("nodemailer");
 const Mail = require("../models/mail");
-const asyncHandler = require("express-async-handler")
+const asyncHandler = require("express-async-handler");
+const { validationResult } = require("express-validator");
 
-const sendMail = asyncHandler(async (req, res) => {
+const sendMail = asyncHandler(async (req, res, next) => {
 
   const { name, email, subject, message, receiverEmail } = req.body;
+
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() })
 
   // Replace these with your actual email service settings
   const transporter = nodemailer.createTransport({
