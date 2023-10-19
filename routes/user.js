@@ -6,23 +6,19 @@ const User = require("../models/user")
 const { check } = require("express-validator")
 
 const signupValidation = [
+    check('fullName')
+        .isLength({ min: 3, max: 50 })
+        .withMessage('Full Name must be at least 3 chars long'),
+    check('gender')
+        .isLength({ min: 4, max: 6 })
+        .withMessage('Username must be at least 3 chars long'),
     check('userName')
-        .isLength({ min: 2, max: 20 })
-        .withMessage('Username must be at least 3 chars long')
+        .isLength({ min: 6, max: 50 })
+        .withMessage('Username must be at least 6 chars long')
         .custom(async (value) => {
             const usernameExist = await User.findOne({ userName: value })
             if (usernameExist) {
                 throw new Error('Username already in use')
-            }
-            return true
-        }),
-    check('email')
-        .isEmail()
-        .withMessage('Invalid email')
-        .custom(async (value) => {
-            const useremailExist = await User.findOne({ email: value })
-            if (useremailExist) {
-                throw new Error('E-mail already in use')
             }
             return true
         }),
@@ -32,9 +28,9 @@ const signupValidation = [
 ]
 
 const loginValidation = [
-    check('email')
-        .isLength({ min: 3, max: 20 })
-        .withMessage('E-mail must be at least 3 chars long'),
+    check('userName')
+        .isLength({ min: 6, max: 50 })
+        .withMessage('User Name must be at least 6 chars long'),
     check('password')
         .isLength({ min: 6 })
         .withMessage('Password must be at least 6 chars long')
