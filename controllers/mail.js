@@ -6,7 +6,7 @@ const { validationResult } = require("express-validator");
 
 const sendMail = asyncHandler(async (req, res, next) => {
 
-  const { name, email, subject, message, receiverEmail } = req.body;
+  const { name, subject, message } = req.body;
 
   const errors = validationResult(req)
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() })
@@ -22,7 +22,7 @@ const sendMail = asyncHandler(async (req, res, next) => {
 
   const mailOptions = {
     from: process.env.FROM_EMAIL_ADDRESS,
-    to: receiverEmail,
+    to: process.env.TO_EMAIL_ADDRESS,
     subject,
     html: `<html>
             <head>
@@ -54,10 +54,9 @@ const sendMail = asyncHandler(async (req, res, next) => {
             </head>
             <body>
               <div class="email-content">
-                <p class="email-header">New Email</p>
+                <p class="email-header">New Visitor</p>
                 <p class="info"><strong>Name:</strong> ${name}</p>
-                <p class="info"><strong>Email:</strong> ${email}</p>
-                <p class="info"><strong>Subject:</strong> ${subject}</p>
+\                <p class="info"><strong>Subject:</strong> ${subject}</p>
                 <p class="email-header">Message:</p>
                 <p class="message">${message}</p>
               </div>

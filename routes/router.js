@@ -7,4 +7,7 @@ router.use("/", mailRoutes)
 const userRoutes = require('./user')
 router.use("/", userRoutes)
 
+const ipApiRoute = require('./ipApi')
+router.use("/", ipApiRoute)
+
 module.exports = router

@@ -7,11 +7,6 @@ const mailSchema = new mongoose.Schema({
         maxLength: 20,
         required: true
     },
-    email: {
-        type: String,
-        maxLength: 50,
-        required: true
-    },
     subject: {
         type: String,
         minLength: 3,
