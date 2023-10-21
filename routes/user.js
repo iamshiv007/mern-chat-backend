@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const { signup, login, logout, getUserDetails } = require("../controllers/user")
+const { signup, login, logout, getUserDetails, getAllUsers } = require("../controllers/user")
 const { isAuthenticatedUser } = require("../middleware/auth")
 const User = require("../models/user")
 const { check } = require("express-validator")
@@ -41,5 +41,6 @@ router.post("/user/login", loginValidation, login)
 
 router.get("/user/logout", logout)
 router.get("/user/me", isAuthenticatedUser, getUserDetails)
+router.get("/user/all", isAuthenticatedUser, getAllUsers)
 
 module.exports = router
