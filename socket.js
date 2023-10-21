@@ -1,6 +1,11 @@
 const { addUser, removeUser, getUser, getUsers } = require("./users")
 
-const io = require('./index')
+module.exports = function (server) {
+    const io = require("socket.io")(server, {
+        cors: {
+            "Access-Control-Allow-Origin": process.env.FRONTEND_URL
+        }
+    });
 
 io.on('connection', (socket) => {
     console.log(`⚡: ${socket.id} user just connected!`)
@@ -41,3 +46,4 @@ io.on('connection', (socket) => {
         console.log('🔥: A user disconnected')
     })
 });
+}
