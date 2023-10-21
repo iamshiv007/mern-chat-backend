@@ -20,13 +20,13 @@ module.exports = function (server) {
             callback()
         });
 
-        socket.on("send-message", (sender, receiver, message, callback) => {
+        socket.on("send-message", (sender, receiver, message, createdAt, callback) => {
             const user = getUser(receiver)
             if (!user) {
                 return callback()
             }
             console.log(user, message)
-            io.to(user.socketId).emit("send-message", sender, message)
+            io.to(user.socketId).emit("send-message", sender, message, createdAt)
             callback()
         })
 

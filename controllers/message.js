@@ -20,4 +20,16 @@ const getTwoChat = asyncHandler(async (req, res) => {
     res.status(200).json({ success: true, messages })
 })
 
-module.exports = { newMessage, getTwoChat }
+const getAllChat = asyncHandler(async (req, res) => {
+    const { sender } = req.params
+    const messages = await Message.find({
+        $or: [
+            { sender },
+            { receiver: sender }
+        ]
+    })
+
+    res.status(200).json({ success: true, messages })
+})
+
+module.exports = { newMessage, getTwoChat, getAllChat }
