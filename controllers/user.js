@@ -1,4 +1,3 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 const User = require("../models/user")
 const asyncHandler = require("express-async-handler")
 const { validationResult } = require("express-validator")
